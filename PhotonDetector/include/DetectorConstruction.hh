@@ -17,19 +17,23 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
 {
   public:
     static constexpr G4int kPhotonDetectorCount = 6;
+    static constexpr G4int kXVIBinsPerAxis = 1024;
 
     MyDetectorConstruction();
     ~MyDetectorConstruction() override;
 
     G4VPhysicalVolume* Construct() override;
+    void ConstructSDandField() override;
 
     void set_yGlue(G4double value);
     void SetDetectorDistance(G4double value);
-    void SetDetectorPadding(G4double value);
+    void SetXVIScintillatorThickness(G4double value);
 
     G4double GetGlueHalfThickness() const { return yGlue; }
     G4double GetDetectorDistance() const { return detectorDistance; }
-    G4double GetDetectorPadding() const { return detectorPadding; }
+    G4double GetXVIScintillatorThickness() const {
+        return 2.0 * xviScintillatorHalfThickness;
+    }
     G4double GetGlueXMin() const { return glueCenter.x() - xGlue; }
     G4double GetGlueXMax() const { return glueCenter.x() + xGlue; }
     G4double GetGlueYMin() const { return glueCenter.y() - yGlue; }
@@ -60,11 +64,9 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
     G4double zGlue;
     G4ThreeVector glueCenter;
 
-    G4double xPlate;
-    G4double yPlate;
-    G4double zPlate;
+    G4double xviPanelHalfSize;
+    G4double xviScintillatorHalfThickness;
     G4double detectorDistance;
-    G4double detectorPadding;
 
     G4Box* solidWorld = nullptr;
     G4Box* solidWater = nullptr;
@@ -84,7 +86,7 @@ class MyDetectorConstruction : public G4VUserDetectorConstruction
     G4Material* worldMat = nullptr;
     G4Material* waterMat = nullptr;
     G4Material* glueMat = nullptr;
-    G4Material* photonDetectorMat = nullptr;
+    G4Material* xviScintillatorMat = nullptr;
 
     DetectorMessenger* MyDetectorMessenger = nullptr;
 };

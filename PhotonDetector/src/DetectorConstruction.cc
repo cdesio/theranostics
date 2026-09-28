@@ -1,12 +1,14 @@
 #include "DetectorConstruction.hh"
 
 #include "DetectorMessenger.hh"
+#include "XVIReadoutSD.hh"
 
 #include "G4Colour.hh"
 #include "G4NistManager.hh"
 #include "G4PVPlacement.hh"
 #include "G4RotationMatrix.hh"
 #include "G4RunManager.hh"
+#include "G4SDManager.hh"
 #include "G4VisAttributes.hh"
 
 #include <array>
@@ -26,11 +28,11 @@ MyDetectorConstruction::MyDetectorConstruction() : G4VUserDetectorConstruction()
     zGlue = 2.0 * cm;
     glueCenter = G4ThreeVector(0.0, yWater + yGlue, 0.0);
 
-    xPlate = 75.0 * cm;
-    yPlate = 10.0 * cm;
-    zPlate = 0.5 * mm;
+    xviPanelHalfSize = 204.8 * mm;
+    // The Bristol documentation does not specify the CsI thickness. Preserve the
+    // previous 1 mm detector thickness until a measured value is available.
+    xviScintillatorHalfThickness = 0.5 * mm;
     detectorDistance = 20.0 * cm;
-    detectorPadding = 5.0 * cm;
 
     MyDetectorMessenger = new DetectorMessenger(this);
     DefineMaterials();
@@ -60,9 +62,9 @@ void MyDetectorConstruction::SetDetectorDistance(G4double value)
     }
 }
 
-void MyDetectorConstruction::SetDetectorPadding(G4double value)
+void MyDetectorConstruction::SetXVIScintillatorThickness(G4double value)
 {
-    detectorPadding = value;
+    xviScintillatorHalfThickness = 0.5 * value;
     if (G4RunManager::GetRunManager() != nullptr)
     {
         G4RunManager::GetRunManager()->GeometryHasBeenModified();
@@ -75,7 +77,7 @@ void MyDetectorConstruction::DefineMaterials()
 
     worldMat = nist->FindOrBuildMaterial("G4_AIR");
     waterMat = nist->FindOrBuildMaterial("G4_WATER");
-    photonDetectorMat = nist->FindOrBuildMaterial("G4_Si");
+    xviScintillatorMat = nist->FindOrBuildMaterial("G4_CESIUM_IODIDE");
 
     glueMat = new G4Material("CyanoacrylateGlue", 1.07 * g / cm3, 4);
     glueMat->AddElement(nist->FindOrBuildElement("C"), 6);
@@ -109,10 +111,7 @@ G4VPhysicalVolume* MyDetectorConstruction::Construct()
         "physPhotonDetectorPosZ",
         "physPhotonDetectorNegZ"};
 
-    const G4double plateHalfThickness = zPlate;
-    const G4double paddedX = xWater + detectorPadding;
-    const G4double paddedY = yWater + detectorPadding;
-    const G4double paddedZ = zWater + detectorPadding;
+    const G4double plateHalfThickness = xviScintillatorHalfThickness;
     const std::array<G4ThreeVector, kPhotonDetectorCount> positions = {
         G4ThreeVector(xWater + detectorDistance + plateHalfThickness, 0, 0),
         G4ThreeVector(-(xWater + detectorDistance + plateHalfThickness), 0, 0),
@@ -121,28 +120,29 @@ G4VPhysicalVolume* MyDetectorConstruction::Construct()
         G4ThreeVector(0, 0, zWater + detectorDistance + plateHalfThickness),
         G4ThreeVector(0, 0, -(zWater + detectorDistance + plateHalfThickness))};
 
-    const std::array<G4ThreeVector, kPhotonDetectorCount> halfSizes = {
-        G4ThreeVector(paddedZ, paddedY, plateHalfThickness),
-        G4ThreeVector(paddedZ, paddedY, plateHalfThickness),
-        G4ThreeVector(paddedX, paddedZ, plateHalfThickness),
-        G4ThreeVector(paddedX, paddedZ, plateHalfThickness),
-        G4ThreeVector(paddedX, paddedY, plateHalfThickness),
-        G4ThreeVector(paddedX, paddedY, plateHalfThickness)};
+    const G4ThreeVector panelHalfSize(
+        xviPanelHalfSize, xviPanelHalfSize, plateHalfThickness);
 
-    auto rotY90 = new G4RotationMatrix();
-    rotY90->rotateY(90 * degree);
-    auto rotX90 = new G4RotationMatrix();
-    rotX90->rotateX(90 * degree);
+    auto rotYPos90 = new G4RotationMatrix();
+    rotYPos90->rotateY(90 * degree);
+    auto rotYNeg90 = new G4RotationMatrix();
+    rotYNeg90->rotateY(-90 * degree);
+    auto rotXPos90 = new G4RotationMatrix();
+    rotXPos90->rotateX(90 * degree);
+    auto rotXNeg90 = new G4RotationMatrix();
+    rotXNeg90->rotateX(-90 * degree);
+    auto rotY180 = new G4RotationMatrix();
+    rotY180->rotateY(180 * degree);
 
     const std::array<G4RotationMatrix*, kPhotonDetectorCount> rotations = {
-        rotY90, rotY90, rotX90, rotX90, nullptr, nullptr};
+        rotYPos90, rotYNeg90, rotXNeg90, rotXPos90, nullptr, rotY180};
 
     for (G4int i = 0; i < kPhotonDetectorCount; ++i)
     {
         solidPhotonDetectors[i] = new G4Box(
-            "solidPhotonDetector", halfSizes[i].x(), halfSizes[i].y(), halfSizes[i].z());
+            "solidXVIPanel", panelHalfSize.x(), panelHalfSize.y(), panelHalfSize.z());
         logicPhotonDetectors[i] = new G4LogicalVolume(
-            solidPhotonDetectors[i], photonDetectorMat, "logicPhotonDetector");
+            solidPhotonDetectors[i], xviScintillatorMat, "logicXVIPanel");
         physPhotonDetectors[i] = new G4PVPlacement(
             rotations[i],
             positions[i],
@@ -172,4 +172,16 @@ G4VPhysicalVolume* MyDetectorConstruction::Construct()
     }
 
     return physWorld;
+}
+
+void MyDetectorConstruction::ConstructSDandField()
+{
+    auto* sdManager = G4SDManager::GetSDMpointer();
+    auto* readout = new XVIReadoutSD("/XVI/readout");
+    sdManager->AddNewDetector(readout);
+
+    for (auto* panel : logicPhotonDetectors)
+    {
+        SetSensitiveDetector(panel, readout);
+    }
 }

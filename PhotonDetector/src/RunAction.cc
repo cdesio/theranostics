@@ -2,8 +2,12 @@
 #include "G4ios.hh"
 #include "DetectorConstruction.hh"
 #include "EventAction.hh"
+#include "G4SDManager.hh"
+#include "G4Threading.hh"
+#include "XVIReadoutSD.hh"
 
-MyRunAction::MyRunAction() {
+MyRunAction::MyRunAction(const G4String& outputFileName)
+    : fOutputFileName(outputFileName) {
 
   G4AnalysisManager *analysisManager = G4AnalysisManager::Instance();
   analysisManager->SetDefaultFileType("root");
@@ -16,6 +20,13 @@ MyRunAction::~MyRunAction() {}
 
 void MyRunAction::BeginOfRunAction(const G4Run*) {
     G4AnalysisManager *man = G4AnalysisManager::Instance();
+
+    auto* readout = dynamic_cast<XVIReadoutSD*>(
+        G4SDManager::GetSDMpointer()->FindSensitiveDetector("/XVI/readout", false));
+    if (readout != nullptr)
+    {
+        readout->Reset();
+    }
 
 
  
@@ -37,6 +48,16 @@ void MyRunAction::EndOfRunAction(const G4Run*) {
     G4AnalysisManager *man = G4AnalysisManager::Instance();
     const auto detConstruction = static_cast<const MyDetectorConstruction*>(
     G4RunManager::GetRunManager()->GetUserDetectorConstruction());
+
+    // In MT mode the master owns an empty SD instance. Only the worker may
+    // write, otherwise the master's zero image overwrites the scored image.
+    auto* readout = dynamic_cast<XVIReadoutSD*>(
+        G4SDManager::GetSDMpointer()->FindSensitiveDetector("/XVI/readout", false));
+    if ((!G4Threading::IsMultithreadedApplication() || !IsMaster()) &&
+        readout != nullptr)
+    {
+        readout->WritePanelImages(fOutputFileName);
+    }
 
     // Write and close file
     man->Write();

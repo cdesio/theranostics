@@ -3,7 +3,7 @@
 
 /det/set_yGlue 500 um
 /det/set_detectorDistance 20 cm
-/det/set_detectorPadding 5 cm
+/det/set_xviScintillatorThickness 1 mm
 
 /run/initialize 
 

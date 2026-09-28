@@ -20,15 +20,14 @@
 class MyRunAction : public G4UserRunAction {
 
     public:
-     MyRunAction();
+     explicit MyRunAction(const G4String& outputFileName);
      ~MyRunAction();
 
      virtual void BeginOfRunAction(const G4Run*);
      virtual void EndOfRunAction(const G4Run*);
 
-	private:		
-
-
+		private:
+         G4String fOutputFileName;
 };
 
 

@@ -48,7 +48,7 @@ DetectorMessenger::DetectorMessenger(MyDetectorConstruction* det)
       fDetector(det),
       yGlue(nullptr),
       detectorDistance(nullptr),
-      detectorPadding(nullptr)
+      xviScintillatorThickness(nullptr)
 {
   yGlue = new G4UIcmdWithADoubleAndUnit("/det/set_yGlue",this);
   yGlue->SetGuidance("Set y size of the glue");
@@ -66,13 +66,14 @@ DetectorMessenger::DetectorMessenger(MyDetectorConstruction* det)
   detectorDistance->AvailableForStates(G4State_PreInit,G4State_Idle);
   detectorDistance->SetToBeBroadcasted(false);
 
-  detectorPadding = new G4UIcmdWithADoubleAndUnit("/det/set_detectorPadding",this);
-  detectorPadding->SetGuidance("Set the extra padding added to each side of each photon detector plate.");
-  detectorPadding->SetParameterName("Padding",false);
-  detectorPadding->SetRange("Padding>=0.");
-  detectorPadding->SetUnitCategory("Length");
-  detectorPadding->AvailableForStates(G4State_PreInit,G4State_Idle);
-  detectorPadding->SetToBeBroadcasted(false);
+  xviScintillatorThickness =
+      new G4UIcmdWithADoubleAndUnit("/det/set_xviScintillatorThickness",this);
+  xviScintillatorThickness->SetGuidance("Set the full thickness of the XVI CsI layer.");
+  xviScintillatorThickness->SetParameterName("Thickness",false);
+  xviScintillatorThickness->SetRange("Thickness>0.");
+  xviScintillatorThickness->SetUnitCategory("Length");
+  xviScintillatorThickness->AvailableForStates(G4State_PreInit,G4State_Idle);
+  xviScintillatorThickness->SetToBeBroadcasted(false);
   
 }
 
@@ -83,7 +84,7 @@ DetectorMessenger::~DetectorMessenger()
 
   delete yGlue;
   delete detectorDistance;
-  delete detectorPadding;
+  delete xviScintillatorThickness;
 
 }
 
@@ -100,9 +101,10 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   {
      fDetector->SetDetectorDistance(detectorDistance->GetNewDoubleValue(newValue));
   }
-  else if( command == detectorPadding )
+  else if( command == xviScintillatorThickness )
   {
-     fDetector->SetDetectorPadding(detectorPadding->GetNewDoubleValue(newValue));
+     fDetector->SetXVIScintillatorThickness(
+         xviScintillatorThickness->GetNewDoubleValue(newValue));
   }
 
 }

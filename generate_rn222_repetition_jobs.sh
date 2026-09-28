@@ -158,7 +158,7 @@ write_header() {
     echo
     echo "/det/set_yGlue 1000 um"
     echo "/det/set_detectorDistance 20 cm"
-    echo "/det/set_detectorPadding 5 cm"
+    echo "/det/set_xviScintillatorThickness 1 mm"
     echo
     echo "/run/initialize"
     echo

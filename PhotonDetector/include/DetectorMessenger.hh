@@ -60,7 +60,7 @@ class DetectorMessenger: public G4UImessenger
     MyDetectorConstruction*    fDetector;
     G4UIcmdWithADoubleAndUnit* yGlue;
     G4UIcmdWithADoubleAndUnit* detectorDistance;
-    G4UIcmdWithADoubleAndUnit* detectorPadding;
+    G4UIcmdWithADoubleAndUnit* xviScintillatorThickness;
     
 };
 

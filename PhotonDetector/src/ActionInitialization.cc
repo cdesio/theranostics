@@ -19,7 +19,7 @@ void MyActionInitialization::Build() const{
       MyPrimaryGeneratorAction *generator = new MyPrimaryGeneratorAction ();
      SetUserAction(generator);
 
-     MyRunAction *runAction = new MyRunAction();
+     MyRunAction *runAction = new MyRunAction(fOutputFileName);
 	SetUserAction(runAction);
 
 	MyEventAction *eventAction=new MyEventAction(runAction);
@@ -36,6 +36,6 @@ void MyActionInitialization::Build() const{
 }
 void MyActionInitialization::BuildForMaster() const{
  
-     MyRunAction *runAction = new MyRunAction();
+     MyRunAction *runAction = new MyRunAction(fOutputFileName);
      SetUserAction(runAction);
 }

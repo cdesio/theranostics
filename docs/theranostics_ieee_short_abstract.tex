@@ -1,0 +1,35 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{times}
+
+\title{Gamma Detection for Source Localisation in Targeted Alpha Therapy}
+\author{
+C. De Sio$^{\text{a}}$,
+L. Abu Sabah$^{\text{a}}$,
+J. Duan$^{\text{a}}$,
+Y. Shi$^{\text{a}}$,
+S. Williams$^{\text{a}}$,
+J. Velthuis$^{\text{a}}$\\
+\vspace{0.3em}
+\small $^{\text{a}}$School of Physics, University of Bristol, Bristol, United Kingdom
+}
+
+\date{}
+
+\begin{document}
+\maketitle
+
+Targeted alpha therapy delivers highly localised dose, so treatment planning and delivery verification depend on whether the radionuclide source remains at the intended deposition site or is redistributed by diffusion or biological transport. 
+This simulation study tests whether decay-chain gamma emissions can provide a detectable source-localisation signal in an AlphaGlue-like geometry. 
+Photon transport was modelled for a thin loaded glue layer on a water phantom surrounded by six detector panels, with each photon entry into a panel counted as one hit. 
+Seven source configurations were analysed: a retained-source baseline, broad redistribution of 10\%, 50\%, or 90\% of the source in water, and localised displacement of 20\%, 40\%, or 60\% of the source to a compact water region. 
+Each configuration used ten repetitions of 10,000 primary decays and was normalised to a 3 $\mu$Ci reference source. 
+Total detector-hit yield changed only modestly, but baseline-subtracted spatial hit profiles showed strong source-dependent structure. 
+The central glue-facing signal fell to 0.94, 0.72, and 0.47 of baseline for the broad-redistribution cases, and to 0.84, 0.67, and 0.50 for the localised-displacement cases. 
+Profile-shape features recovered the broad diffusion fraction with an $R^2$ value of $0.998$, while a secondary-source metric identified all localised displaced-source cases. 
+The reconstructed displaced-source position was centred at approximately $525$--$531$~mm, compared with the simulated 500 mm source region. 
+Time-window analysis showed that large redistributions reached three-standard-deviation thresholds within 30 minutes to 2 hours; the weakest broad redistribution required about 6 hours, and the 20\% localised displacement produced detectable displaced-region excess within about 1 hour. 
+These results indicate that gamma-hit patterns provide source-location information beyond total count rate and could support activity verification and treatment-delivery monitoring.
+
+\end{document}

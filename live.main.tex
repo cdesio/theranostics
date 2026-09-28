@@ -1,0 +1,324 @@
+\documentclass[11pt,a4paper]{article}
+
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{xcolor}
+
+\sisetup{detect-all=true}
+\graphicspath{{../figures/Detector_performance_analysis_Rn222_repetition_comparison/}{figures/Detector_performance_analysis_Rn222_repetition_comparison/}}
+
+\title{Photon Simulation Model and Rn-222 Detector-Response Results}
+\author{Theranostics simulation workspace}
+\date{\today}
+
+\begin{document}
+
+
+\usepackage[margin=1in]{geometry}
+\usepackage{booktabs}
+\usepackage{siunitx}
+\usepackage{amsmath}
+\usepackage{graphicx}
+\usepackage{hyperref}
+\usepackage{longtable}
+\usepackage{xcolor}
+
+\sisetup{detect-all=true}
+\graphicspath{{../figures/Detector_performance_analysis_Rn222_repetition_comparison/}{figures/Detector_performance_analysis_Rn222_repetition_comparison/}}
+
+\title{Photon Simulation Model and Rn-222 Detector-Response Results}
+\author{Theranostics simulation workspace}
+\date{\today}
+
+\begin{document}
+\maketitle
+
+\begin{abstract}
+This note summarizes a photon-transport model for Rn-222 decay-chain
+activity near a thin glue layer coupled to a water phantom.  The current
+results show that changing the Rn-222 spatial distribution has a modest
+effect on total photon-detector entries, but a strong effect on the
+relative loading of the six detector panels.  Moving activity from the
+glue layer into water reduces the dominant positive-\(y\) response and
+increases the negative-\(y\), \(x\)-panel, and \(z\)-panel responses.
+\end{abstract}
+
+\section{Simulation Objective}
+
+The simulation models photon signatures from Rn-222 decay-chain activity
+near a thin glue layer coupled to a water phantom.  The practical question
+is whether photon-detector hit patterns can distinguish activity retained
+near the glue from activity that has diffused or been placed elsewhere in
+the water volume.  The analysis considers detector-entry counts, panel
+profiles, energy and time spectra, source attribution, and simple
+back-projection diagnostics.
+
+\section{Geometry and Materials}
+
+The model contains:
+
+\begin{itemize}
+  \item a \(2 \times 2 \times 2~\si{m}\) air world;
+  \item a water box with half-lengths \(x=\SI{10}{cm}\), \(y=\SI{10}{cm}\),
+        and \(z=\SI{75}{cm}\);
+  \item a cyanoacrylate glue slab with half-lengths \(x=\SI{2}{cm}\),
+        \(y=\SI{0.5}{mm}\), and \(z=\SI{2}{cm}\), centered at
+        \(y=\SI{100.5}{mm}\);
+  \item six silicon photon-detector plates surrounding the water box at
+        \(\SI{20}{cm}\) from the water surface, with an additional
+        \(\SI{5}{cm}\) lateral padding.
+\end{itemize}
+
+The glue material is represented as cyanoacrylate with density
+\(\SI{1.07}{g.cm^{-3}}\) and elemental composition \(C_6H_7NO_2\).  The
+water and silicon detector materials use standard reference material
+definitions.
+
+\section{Physics and Source Model}
+
+The transport model includes low-energy electromagnetic interactions,
+radioactive decay-chain evolution, and step limiting.  The production-cut
+energy range is set to \(\SI{100}{eV}\) to \(\SI{1}{GeV}\), with a default
+cut value of \(\SI{1}{nm}\).  Primaries are generated as stationary
+Rn-222 ions:
+\[
+  Z=86, \qquad A=222, \qquad E=\SI{0}{MeV}.
+\]
+
+Rn diffusion is represented by sampling a random direction and a
+decay-time-dependent displacement scale
+\[
+  \Delta r \sim \left| \mathcal{N}\left(0, \sqrt{6Dt}\right) \right|,
+\]
+with \(D=\SI{1.12e-3}{mm^2.s^{-1}}\) for radon.  The glue slab side walls
+reflect the sampled displacement in \(x\) and \(z\).  Motion out of the top
+of the glue is reflected, while motion below the bottom glue boundary is
+logged as an Rn-222 glue-exit event.  The exit log records event ID, track
+ID, estimated exit time, decay time, start position, exit position, and
+final sampled position.
+
+\section{Repeated Rn-222 Campaign}
+
+The repeated-run campaign contains six source configurations, each with ten
+independent repetitions and \(10{,}000\) simulated primary Rn-222 events per
+repetition.  Each repetition uses a unique random seed.
+
+\begin{table}[h]
+\centering
+\caption{Rn-222 source configurations in the repeated campaign.  The glue
+source is a \(20 \times 1 \times 20~\si{mm}\) half-size volume centered at
+\((0,101,0)~\si{mm}\).  The diffuse water source is the full water box.
+The localized water source is a \(2.5~\si{cm}\) half-size cube centered at
+\((0,0,50)~\si{cm}\).}
+\begin{tabular}{lll}
+\toprule
+Case & Glue fraction & Additional Rn-222 source \\
+\midrule
+baseline & 1.0 & none \\
+diff10 & 0.9 & 0.1 diffuse in water box \\
+diff50 & 0.5 & 0.5 diffuse in water box \\
+diff90 & 0.1 & 0.9 diffuse in water box \\
+loc40 & 0.6 & 0.4 localized in water cube \\
+loc60 & 0.4 & 0.6 localized in water cube \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\section{Analysis Definitions}
+
+The primary analysis records gamma entries and exits at the water volume,
+glue volume, and detector plates.  The detector-response metrics in this
+note use gamma tracks entering a photon detector plate:
+\[
+  \mathrm{particle}=\gamma, \qquad
+  \mathrm{boundary}=\mathrm{enter}, \qquad
+  \mathrm{volume}=\mathrm{photon~detector}.
+\]
+Counts are therefore detector-entry counts, not all emitted photons.  The
+analysis also forms unique detected gamma-track counts by de-duplicating
+within each event.  Profile and heatmap comparisons use baseline-subtracted
+detector-entry histograms, with repeated runs providing the run-to-run
+uncertainty.
+
+\section{Results}
+
+\subsection{Total Detector Entries}
+
+Table~\ref{tab:total-response} summarizes the total detector entries per
+\(10{,}000\) primary Rn-222 events.  The total response decreases from the
+baseline to high water-distributed cases, but the change is small compared
+with the much larger redistribution among detector panels shown below.
+
+\begin{table}[h]
+\centering
+\caption{Mean detector-entry counts across ten repetitions.  Uncertainties
+are sample standard deviations across repetitions.}
+\label{tab:total-response}
+\begin{tabular}{lccc}
+\toprule
+Case & Detector entries & Unique gamma tracks & Entries per primary event \\
+\midrule
+baseline & \(12500 \pm 82\) & \(12415 \pm 82\) & \(1.250 \pm 0.008\) \\
+diff10 & \(12431 \pm 100\) & \(12349 \pm 97\) & \(1.243 \pm 0.010\) \\
+diff50 & \(12300 \pm 130\) & \(12218 \pm 128\) & \(1.230 \pm 0.013\) \\
+diff90 & \(12057 \pm 86\) & \(11981 \pm 87\) & \(1.206 \pm 0.009\) \\
+loc40 & \(12174 \pm 79\) & \(12096 \pm 80\) & \(1.217 \pm 0.008\) \\
+loc60 & \(12134 \pm 81\) & \(12058 \pm 80\) & \(1.213 \pm 0.008\) \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\subsection{Detector-Panel Redistribution}
+
+Table~\ref{tab:panel-response} gives mean detector-entry counts by panel.
+The baseline case is dominated by the positive-\(y\) plate because the glue
+source lies immediately above the water box.  As more Rn-222 is assigned to
+water, the positive-\(y\) excess is reduced and the negative-\(y\), \(x\),
+and \(z\) panels receive larger shares.  The localized water cases retain
+the same qualitative behavior but produce asymmetric \(z\)-panel responses
+because the localized cube is placed at positive \(z\).
+
+\begin{table}[h]
+\centering
+\caption{Mean detector-entry counts by detector panel across ten repetitions.}
+\label{tab:panel-response}
+\begin{tabular}{lrrrrrr}
+\toprule
+Case & NegX & PosX & NegY & PosY & NegZ & PosZ \\
+\midrule
+baseline & 2570 & 2594 & 1420 & 5882 & 18 & 16 \\
+diff10 & 2622 & 2632 & 1550 & 5552 & 35 & 40 \\
+diff50 & 2740 & 2743 & 2143 & 4412 & 133 & 130 \\
+diff90 & 2851 & 2851 & 2736 & 3178 & 223 & 218 \\
+loc40 & 2694 & 2683 & 1986 & 4663 & 11 & 136 \\
+loc60 & 2741 & 2748 & 2315 & 4117 & 9 & 204 \\
+\bottomrule
+\end{tabular}
+\end{table}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{y_panel_baseline_subtracted_z_profiles.png}
+\caption{Baseline-subtracted \(z\)-profiles for the positive-\(y\) and
+negative-\(y\) detector panels.  Moving Rn-222 from the glue layer into
+water changes the panel balance and produces a measurable residual
+structure along the detector length.}
+\label{fig:y-profile}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{y_panel_residual_significance_profiles.png}
+\caption{Residual-significance profiles for the \(y\)-panel comparison.
+The repeated runs are used to estimate the uncertainty on the
+candidate-minus-baseline profile.}
+\label{fig:y-significance}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{y_panel_2d_residual_maps_loc60.png}
+\caption{Two-dimensional \(y\)-panel residual maps for the localized
+water-source case with 60\% of the activity in the localized water region.}
+\label{fig:y-map}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{x_panel_yz_residual_maps_loc40.png}
+\caption{\(x\)-panel \(y\)-\(z\) residual maps for the localized water-source
+case with 40\% of the activity in the localized water region.}
+\label{fig:x-map}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{y_panel_asymmetry_residual.png}
+\caption{Positive-\(y\) minus negative-\(y\) asymmetry residual.  This
+diagnostic emphasizes the directional shift in detector response as
+activity leaves the glue-dominated source configuration.}
+\label{fig:y-asymmetry}
+\end{figure}
+
+\subsection{Isotope Attribution}
+
+Across all Rn-222 configurations, detected photons are dominated by
+late-chain gamma emitters.  In the baseline case, approximately
+\(\SI{60.5}{\percent}\) of detector entries are attributed to Po-214,
+\(\SI{37.1}{\percent}\) to Bi-214, and \(\SI{2.2}{\percent}\) to Bi-210.
+Pb-214 and other isotopes are present at the sub-percent level in the
+detector-entry stream.  The isotope mix remains nearly unchanged across
+the source-placement cases, so the strongest discriminant in the current
+analysis is spatial detector response rather than a change in gamma-line
+parentage.
+
+\subsection{Timing}
+
+Cumulative time cuts show how many detector entries would be available as
+a function of observation time.  For the baseline case, the mean cumulative detector
+entries are \(29.5\) at 1 hour, \(106.3\) at 2 hours, \(977.8\) at 12 hours,
+\(1933.3\) at 1 day, \(3639.8\) at 2 days, \(7217.8\) at 5 days, and
+\(10204.6\) at 10 days, per \(10{,}000\) simulated primaries.  The other
+source configurations follow similar time evolution with lower totals in
+the high-water-fraction cases.
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{time_window_integrated_residual_vs_time.png}
+\caption{Integrated baseline-subtracted residuals as a function of
+cumulative observation window.}
+\label{fig:time-integrated}
+\end{figure}
+
+\begin{figure}[h]
+\centering
+\includegraphics[width=\textwidth]{time_window_max_zscore_vs_time.png}
+\caption{Maximum residual significance as a function of cumulative
+observation window.}
+\label{fig:time-zscore}
+\end{figure}
+
+\subsection{Rn-222 Glue Exit}
+
+The dedicated Rn-222 exit log records how often sampled Rn-222 motion
+crosses the bottom of the glue slab before decay.  In the all-glue baseline
+case, \(4593 \pm 50\) Rn-222 tracks per \(10{,}000\) primaries exit the glue
+in the logged downward direction.  The mean repetition-level median exit
+time is \(4.81 \pm 0.13\) hours, while the mean 90th-percentile exit time is
+\(32.64 \pm 1.27\) hours.  As expected, the number of glue-exit records
+scales down with the simulated fraction of Rn-222 initially assigned to the
+glue layer: \(4094 \pm 41\) for diff10, \(2278 \pm 46\) for diff50, and
+\(456 \pm 18\) for diff90.
+
+\section{Interpretation}
+
+The current simulation and analysis support three conclusions.
+First, the detector system is sensitive to source placement through panel
+balance: total counts alone are a weak discriminator, but the relative
+response of \(+y\), \(-y\), \(x\), and \(z\) plates changes systematically.
+Second, the dominant detected gamma population comes from Po-214 and
+Bi-214, so isotope attribution mainly confirms the expected Rn-222 decay
+chain rather than separating the spatial hypotheses.  Third, the logged
+diffusion model predicts substantial Rn-222 movement from the glue into
+water on hour-scale times, which is consistent with the need for cumulative
+time-window analysis and activity-normalized projections.
+
+\section{Limitations and Next Steps}
+
+The current tabulated analysis treats detector entries as ideal photon hits.  It
+does not yet include detector efficiency, energy resolution, coincidence
+logic, electronic thresholds, or measured background.  The back-projection
+analysis estimates source-track proxies from detector-entry position and
+momentum, but a single gamma constrains a line rather than a unique source
+point.  A stronger reconstruction study should combine detector response
+maps with a likelihood model over source distributions and should include
+the detector-response model needed for comparison with data.
+
+\end{document}
+
+\end{document}

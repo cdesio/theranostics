@@ -1,0 +1,192 @@
+
+\documentclass[10pt,twocolumn]{article}
+
+% --- Reduce margins ---
+\usepackage[a4paper,margin=1.5cm]{geometry}
+
+% --- For superscripts and symbols ---
+\usepackage{authblk}
+\usepackage{setspace}
+\usepackage[compact]{titlesec}
+%\usepackage[style=authoryear]{biblatex}
+%\AtEveryCitekey{\clearfield{title}}
+
+
+% --- Other Packages ---
+% Add this line to make pdfs compatible with BART
+\pdfoptionpdfminorversion=4
+\usepackage{graphicx} % to add graphics to the document
+\usepackage[separate-uncertainty=true]{siunitx}
+\usepackage{hyperref}
+\usepackage{amsbsy,amssymb,amsmath,bm}% for mathematical symbols and environments
+% Sort out paragraph spacing and indent
+\parskip 0.5\baselineskip
+\parindent 0mm
+%Preventing Hyphenation
+\usepackage[none]{hyphenat}
+% Some style changes for the figures and references
+\renewcommand\refname{\vspace{-\baselineskip}} % remove `references' above the bibliography
+\usepackage{float}
+\usepackage{booktabs}
+\usepackage{xcolor}
+
+% --- Remove big title spacing ---
+\makeatletter
+\renewcommand{\maketitle}{
+\twocolumn[
+  \begin{center}
+    {\LARGE \@title \par}
+    \vspace{0.5em}
+    {\normalsize \@author \par}
+    \vspace{1em}
+  \end{center}
+]
+}
+\makeatother
+
+% --- Title ---
+\title{Cluster Size Simulation to Predict LHCb Upgrade I VELO Performance}
+
+% --- Authors ---
+\author{
+Sean Williams$^{\text{a}}$,
+Emma Buchanan$^{\text{b}}$,
+David Friday$^{\text{c}}$,
+Jaap Velthuis$^{\text{a}}$\\
+\vspace{0.3em}
+\small on behalf of the LHCb VELO group \\
+\vspace{0.5em}
+\small $^{\text{a}}$H.H. Wills Physics Laboratory, University of Bristol, Bristol, United Kingdom \\
+\small $^{\text{b}}$School of Physics and Astronomy, University of Edinburgh, Edinburgh, United Kingdom\\
+\small $^{\text{c}}$Department of Physics and Astronomy, University of Manchester, United Kingdom
+}
+
+\date{}  % removes date
+
+\begin{document}
+
+\include{shortcuts}
+
+\maketitle
+
+%Abstract
+%\begin{center}
+    \textbf{
+% \textit{
+The recent upgrade of the LHCb VErtex LOcator (VELO) has raised radiation hardness demands. Previous analysis of bias voltage scans has shown the VELO is at risk of exceeding the maximum \qty{1000}{V} bias voltage limit to remain at operational performance. Here, we present a data-driven simulation of clusters in the VELO, to predict the performance at the end of its lifetime. Excellent agreement between the simulation and both testbeam \& Run III data is observed. Preliminary results estimate the hit efficiency to be 89.41$\pm$0.14\% in the innermost regions at \qty{8e15}{1MeV.n_{eq}.cm^{-2}}.
+% }
+}
+%\end{center}
+
+\subsection*{Introduction}
+
+The LHCb experiment is built for precision measurements of heavy flavour physics to search for indirect evidence of CP (Charge Parity) violation. 
+%Probing CP violation in the weak interaction is of critical importance for explaining the discrepancy between the Standard Model and nature regarding matter anti-matter asymmetry. 
+LHCb underwent an extensive upgrade 
+with the goal of significantly increasing the quantity of collected $b$-hadrons.
+%The LHCb experiment is specialised to provide precision measurements of heavy flavour physics, in particular the decays of $b$ and $c$ quarks, to search for indirect evidence of CP (Charge Parity) violation. Probing CP violation in the weak interaction is of critical importance for explaining the discrepancy between the Standard Model and nature regarding matter anti-matter asymmetry\cite{LHCb-DP-2008-001}. After 10 years of operation (Runs I \& II), LHCb underwent an extensive upgrade (Upgrade I), with the goal of significantly increasing the quantity of collected $b$-hadrons. 
+%The VErtex LOcator (VELO) is the closest sub-detector to the $p-p$ collisions. It provides the initial tracking information and the location of secondary decay vertices. As a result of Upgrade I, the luminosity experienced in the VELO will increase from
+%\qty{4e32}{cm^{-2}.s^{-1}} in Runs I \& II to \qty{2e33}{cm^{-2}.s^{-1}} \cite{Bediaga:2013tje}. Consequently, the most irradiated regions of the VELO are expected to experience fluences of \qty{8e15}{1MeV.n_{eq}.cm^{-2}} (see Fig \ref{fig:Expected_Fluence}). It is vital that good performance (i.e. position resolution, hit efficiency, purity) be maintained until the end of Run IV to ensure that as much of the expected \qty{50}{fb^{-1}} collected data is useful for physics analyses.
+The VErtex LOcator (VELO) is the closest sub-detector to the collisions. It provides the initial tracking information and location of secondary decay vertices. As a result of the upgrade, the most irradiated regions of the VELO are expected to experience fluences of \qty{8e15}{1MeV.n_{eq}.cm^{-2}}. It is vital that good performance (i.e. position resolution, hit efficiency, purity) be maintained to ensure that as much of the collected data is useful for physics analyses.
+
+%\begin{figure}[H]
+%    \centering
+%    \includegraphics[width=0.5\linewidth]{Figures/Expected Fluence.png}
+%    \caption{Expected integrated radiation dose in the $R-z$ plane per \si{fb^{-1}} during Upgrade I in units of \qty{1}{MeV.n_eq.cm^{-2}}\cite{Bediaga:2013tje}. Vertical lines represent the position of VELO modules.}
+%    \label{fig:Expected_Fluence}
+%\end{figure}
+
+As part of the upgrade, a hybrid pixel detector designed in the \qty{130}{nm} CMOS technology was installed.
+This has been shown to be radiation hard over \qty{4}{MGy}\cite{Aaij_2024}. The maximum bias voltage that can be supplied is 
+\qty{1000}{V}. 
+%Increasing the bias voltage can help to mitigate the damage to the sensor caused by the harsh radiation environment. 
+Pre-installation studies predicted \qty{1000}{V} would be enough to remain at required performance until 2033\cite{Bediaga:2013tje}. However, initial analysis of bias voltage scans with 2025  data (presented at IEEE Yokohama, 2025) have shown that for the most irradiated regions the bias voltage would need to exceed \qty{1000}{V} to maintain this performance. This 
+motivated a detailed prediction study of the VELO performance over time.
+To predict the expected sensor performance, a cluster formation simulation has been developed, built on the aforementioned 
+voltage scan data. TCAD simulations for the VELO exist\cite{FOLKESTAD201794}, predicting IV and Charge Collection Efficiency curves.
+However, this simulation approaches the challenge from a different perspective, instead looking to match data directly from the VELO. 
+
+\subsection*{Testbeam \& VELO Comparison}
+
+In the simulation charge is generated along the track and the charge drift and diffusion is modeled. Next clusters are built and their properties studied and compared. The change of doping concentration with fluence is modeled with the Hamburg model\cite{Moll:1999kv, Grummer}. Hamburg model parameters are found from fits to the 2025 bias voltage scan analysis. This allows the simulation to extrapolate to sensor conditions at a range of fluences.
+Extensive validation of the model using testbeam data\cite{Buchanan:2653356} has been performed. Figure~\ref{fig:Angle_V_Scan}(a)\&(b) show the fraction of different cluster sizes as a function of track angle and bias voltage in both testbeam and simulation for a non-irradiated sensor.
+Very good agreement is observed.
+%for track angles $\leq30^{\circ}$, which make up the vast majority of VELO tracks. 
+
+%for track angles $\leq30^{\circ}$. There is a discrepancy $>30^{\circ}$, however this is not of immediate concern for the simulations validity as the vast majority of VELO tracks are $\leq30^{\circ}$. The bias voltage shows dependence of the cluster sizes in the VELO data shows a similarly good correspondence. Some difference is seen for size 3\&4 clusters, however the shape voltage is very similar, and the absolute difference is made to look worse with the log scale.
+Figure \ref{fig:Intra_Pixel} shows the collected charge vs the intra-pixel hit position for size 2 clusters from perpendicular tracks
+for testbeam (a) and simulation (b). This plot shows the extent of charge sharing due to diffusion in the sensor. %The diffusion is a critical component for the formation of larger clusters. Both simulation and testbeam have a significant number of size 2 at distances $\sim$\qty{10}{\mu m} from the pixel edge, 
+The excellent correspondence indicates that the diffusion model is accurate. Some extra noisy size 2 clusters are observed in the centre of the pixel for the testbeam due to random data effects, however these are not expected in the simulation.
+
+\begin{figure}[!htbp]
+        \centering
+\includegraphics[width=0.45\linewidth]{Figures/Legend.png}\\
+    (a)\includegraphics[width=0.4\linewidth]{Figures/Angle_Comparison.pdf}
+    (b)\includegraphics[width=0.4\linewidth]{Figures/Voltage_Comparison_Pre_log.pdf}
+    \caption{\textit{The fraction of size 1-4 clusters as a function of the (a) track angle and (b) bias voltage in both the simulation and testbeam. Both (a) and (b) share a common legend.}}
+    \label{fig:Angle_V_Scan}
+\end{figure}
+
+
+% \begin{figure}[!htbp]
+
+% %   \hspace{-2cm} \includegraphics[width=0.45\linewidth]{Figures/Angle_Comparison_Leg.pdf} \\
+%         \centering
+% \includegraphics[width=0.45\linewidth]{Figures/Legend.png}\\
+%     (a)\includegraphics[width=0.4\linewidth]{Figures/Angle_Comparison.pdf}
+%     (b)\includegraphics[width=0.4\linewidth]{Figures/Voltage_Comparison_Pre_log.pdf}
+%     (c)\includegraphics[width=0.75\linewidth]{Figures/Intra_Pixel_Charges_Testbeam.pdf}\\
+%     (d)\includegraphics[width=0.75\linewidth]{Figures/Intra_Pixel_Size_2_Smeared.pdf}
+%     \caption{\textit{The fraction of size 1-4 clusters as a function of the (a) track angle and (b) bias voltage in both the simulation and testbeam. Both (a) and (b) share a common legend. The collected charge in both the seed and neighbour pixel for a size 2 cluster as a function of the intra-pixel hit position for (c) testbeam and (d) simulation. The dotted black line marks the threshold required to count as a hit.}}
+%     \label{fig:Intra_Pixel}
+% \end{figure}
+
+\begin{figure}[!htbp]
+    (a)\includegraphics[width=0.85\linewidth]{Figures/Intra_Pixel_Charges_Testbeam.pdf}\\
+    (b)\includegraphics[width=0.85\linewidth]{Figures/Intra_Pixel_Size_2_Smeared.pdf}
+    \caption{\textit{The collected charge in both the seed and neighbour pixel for a size 2 cluster as a function of the intra-pixel hit position for (a) testbeam and (b) simulation. The dotted black line marks the threshold required to count as a hit.}}
+    \label{fig:Intra_Pixel}
+\end{figure}
+
+Figure~\ref{fig:HV_scan}(a) shows the fraction of different cluster sizes as a function of the bias voltage, for both VELO data and simulation for module 20 at a radial distance of \qty{30\pm0.5}{mm}. The simulations performed for Figure~\ref{fig:HV_scan} occur at the same fluence that module 20 at a radius of \qty{30\pm0.5}{mm} had experienced at the time of the bias voltage scan.
+% The bias voltage scan analysis allows separation of different radial distances from the proton beam. This has the advantage of giving sub-%sensor precision to the local radiation damage. Figure \ref{fig:HV_scan} shows an example for clusters in module 20 at a radius \qty{30\pm0.5}{mm}. 
+The correspondence between data and simulation is good for a wide range of other module-radius combinations.
+%Preliminary comparisons showed 
+However, the simulation does overestimate size 1 and 2 clusters, and underestimates size 3 and 4 compared to the VELO data. 
+The reason for this is yet unknown. It is suspected that differences in VELO charge collection through Ikrum settings and 
+differences between the TimePix3 (testbeam) and VELOPix (installed in the VELO) ASICs are the causes. Work to improve the correspondence further is ongoing. 
+%To ensure the required match with Run III data, a first order correction term is applied to the cluster size fraction. The correction recovers a good match with the VELO data, both in Figure \ref{fig:HV_scan} 
+
+The hit efficiency for the same module and radius is shown in Figure~\ref{fig:HV_scan}(b). The hit efficiency drops when the sensor is under depleted, but is maintained at the $\sim$99\% expected level under full depletion. 
+
+\begin{figure}[h!]
+    \centering
+    (a)\includegraphics[width=0.85\linewidth]{Figures/CSF_Mod20_Rad30_Abstract.pdf}
+    (b)\includegraphics[width=0.45\linewidth]{Figures/Hit_Efficiency_Mod20_Rad30_5000thresh.pdf}
+    \caption{\textit{(a) The fraction of size 1-4 clusters in module 20 at a radial distance of \qty{30\pm0.5}{mm} for data and the simulation. Green line shows fit to VELO data. (b) The corresponding hit efficiency as a function of bias voltage.}}
+    \label{fig:HV_scan}
+\end{figure}
+
+\subsection*{Extrapolation}
+ 
+Preliminary results predict the hit efficiency to be 89.41$\pm$0.14\% at \qty{1000}{V} and \qty{8e15}{1MeV.n_{eq}.cm^{-2}} for the innermost regions (here module 20 at \qty{6\pm0.5}{mm}). Such an efficiency would be problematic for tracking performance. The simulated residuals for the same region, at \qty{1000}{V}, both pre-irradiation and maximally irradiated, are displayed in Figure \ref{fig:Residuals}. Reduced charge collection due to radiation damage increases the number of size 1 clusters, which make up the broad part of the distribution. As a result, the extracted position resolution in the $x$ axis increases from \qty{16.68\pm0.28}{\mu m} to \qty{19.98\pm0.37}{\mu m}.
+
+\begin{figure}[h!]
+    \centering
+    \includegraphics[width=0.65\linewidth]{Figures/Residuals_Before_After.pdf}
+    \caption{\textit{The simulated residuals in the x axis for module 20 at \qty{6\pm0.5}{mm} both before and after the maximum irradiation.}}
+    \label{fig:Residuals}
+\end{figure}
+
+
+\subsection*{Conclusion}
+Since the upgrade, the VELO is subject to an extreme radiation environment. A data-driven simulation has been developed to predict performance as a function of the exposed fluence, with good agreement seen between testbeam and VELO data. Following this successful match, an early prediction of the hit efficiency at \qty{8e15}{1MeV.n_{eq}.cm^{-2}} has been performed, with the predicted efficiency dropping below 90\%. Furthermore, a preliminary position resolution measurement of \qty{19.98\pm0.37}{\mu m} at the end of lifetime has been extracted. These results highlight the need to make use of beneficial annealing for the rest of the sensor lifetime, to ensure performance remains as good as possible.
+
+\subsection*{References}
+{\small
+\bibliographystyle{unsrt}
+\bibliography{references}
+}
+
+
+\end{document}

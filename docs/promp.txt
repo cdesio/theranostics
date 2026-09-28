@@ -1,0 +1,12 @@
+let's revisit the simulation output analysis (lots of *ipynb) based on the following: right now we have calculated the z profiles of detected gammas ( 
+theranostics_EDA.ipynb
+), and baseline subtractions and time dependency 
+Detector_performance_analysis_Rn222_activity_normalized.ipynb
+ and Detector_performance_analysis_Rn222_repetition_comparison).
+ what's missing in the analysis is some metric that show the ability, using the detected photon signal (height and spread) in all cases to estimate:
+- the amount of diffusion in each case, based on the measured signal; 
+- the amount of material put on the patient (amount of signal in the measured area, based on signal intensity)
+- whether a secondary source is present, and its location. 
+
+let's make a separate notebook to try and calculate these quantities from the simulation outputs - previous result can be reused
+

@@ -1,0 +1,17 @@
+.DS_Store
+__pycache__/
+*.py[cod]
+
+# Geant4/CMake build products and simulation output
+PhotonDetector/build/
+rn222_repetition_runs/
+
+# Generated analysis and document-rendering output
+outputs/
+tmp/
+*.aux
+*.fdb_latexmk
+*.fls
+*.log
+*.out
+*.synctex.gz

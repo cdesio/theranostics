@@ -1,0 +1,19 @@
+/random/setSeeds 87 88
+
+/det/set_yGlue 500 um
+/det/set_detectorDistance 20 cm
+/det/set_xviScintillatorThickness 1 mm
+
+/run/initialize
+
+/gps/pos/type Volume
+/gps/pos/shape Para
+/gps/pos/halfx 10 mm
+/gps/pos/halfy 500 um
+/gps/pos/halfz 20 mm
+/gps/pos/centre 10 20.5 0 mm
+
+/gps/particle ion
+/gps/ion 86 222 0 0
+/gps/ene/type Mono
+/gps/energy 0 MeV

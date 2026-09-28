@@ -11,6 +11,7 @@
 #include "ActionInitialization.hh"
 #include "globals.hh"
 #include <cstdlib>
+#include <filesystem>
 #include <string>
 int main(int argc, char** argv)
 {
@@ -76,6 +77,11 @@ int main(int argc, char** argv)
 
   // Get the pointer to the User Interface manager
   G4UImanager* UImanager = G4UImanager::GetUIpointer();
+  const std::filesystem::path executableDirectory =
+      std::filesystem::absolute(argv[0]).parent_path();
+  const auto executeMacro = [UImanager](const std::filesystem::path& path) {
+    UImanager->ApplyCommand("/control/execute " + path.string());
+  };
 
   // Process macro or start UI session
 #ifdef ALPHAGLUE_USE_VIS
@@ -89,16 +95,22 @@ int main(int argc, char** argv)
     if (!macroFile.empty()) {
       G4String command = "/control/execute ";
       UImanager->ApplyCommand(command + macroFile);
+      executeMacro(executableDirectory / "vis.mac");
     } else {
-      UImanager->ApplyCommand("/control/execute pos.mac");
+      executeMacro(executableDirectory / "setup.mac");
+      executeMacro(executableDirectory / "vis.mac");
+      UImanager->ApplyCommand("/run/printProgress 10");
+      UImanager->ApplyCommand("/run/beamOn 100");
     }
-    UImanager->ApplyCommand("/control/execute vis.mac");
     ui->SessionStart();
     delete ui;
   }
 #else
-  G4String runMacro = macroFile.empty() ? "pos.mac" : macroFile;
-  UImanager->ApplyCommand("/control/execute " + runMacro);
+  if (macroFile.empty()) {
+    executeMacro(executableDirectory / "pos.mac");
+  } else {
+    UImanager->ApplyCommand("/control/execute " + macroFile);
+  }
 #endif
 
 #ifdef ALPHAGLUE_USE_VIS

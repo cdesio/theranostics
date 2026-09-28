@@ -40,6 +40,7 @@
 #include "G4UIcmdWithADoubleAndUnit.hh"
 #include "G4UIcmdWithoutParameter.hh"
 #include "G4UIcmdWithAnInteger.hh"
+#include "G4ios.hh"
 
 //....oooOO0OOooo........oooOO0OOooo........oooOO0OOooo........oooOO0OOooo......
 
@@ -48,6 +49,7 @@ DetectorMessenger::DetectorMessenger(MyDetectorConstruction* det)
       fDetector(det),
       yGlue(nullptr),
       detectorDistance(nullptr),
+      detectorPadding(nullptr),
       xviScintillatorThickness(nullptr)
 {
   yGlue = new G4UIcmdWithADoubleAndUnit("/det/set_yGlue",this);
@@ -65,6 +67,15 @@ DetectorMessenger::DetectorMessenger(MyDetectorConstruction* det)
   detectorDistance->SetUnitCategory("Length");
   detectorDistance->AvailableForStates(G4State_PreInit,G4State_Idle);
   detectorDistance->SetToBeBroadcasted(false);
+
+  detectorPadding = new G4UIcmdWithADoubleAndUnit("/det/set_detectorPadding",this);
+  detectorPadding->SetGuidance(
+      "Deprecated compatibility command; ignored because the XVI panel size is fixed.");
+  detectorPadding->SetParameterName("Padding",false);
+  detectorPadding->SetRange("Padding>=0.");
+  detectorPadding->SetUnitCategory("Length");
+  detectorPadding->AvailableForStates(G4State_PreInit,G4State_Idle);
+  detectorPadding->SetToBeBroadcasted(false);
 
   xviScintillatorThickness =
       new G4UIcmdWithADoubleAndUnit("/det/set_xviScintillatorThickness",this);
@@ -84,6 +95,7 @@ DetectorMessenger::~DetectorMessenger()
 
   delete yGlue;
   delete detectorDistance;
+  delete detectorPadding;
   delete xviScintillatorThickness;
 
 }
@@ -100,6 +112,11 @@ void DetectorMessenger::SetNewValue(G4UIcommand* command,G4String newValue)
   else if( command == detectorDistance )
   {
      fDetector->SetDetectorDistance(detectorDistance->GetNewDoubleValue(newValue));
+  }
+  else if( command == detectorPadding )
+  {
+     G4cout << "[XVI] /det/set_detectorPadding is deprecated and ignored; "
+            << "the panel is fixed at 409.6 mm x 409.6 mm." << G4endl;
   }
   else if( command == xviScintillatorThickness )
   {
